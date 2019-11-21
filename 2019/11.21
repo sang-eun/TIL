@@ -1,0 +1,101 @@
+# 11월 21일 회고
+## 부스트캠프
+- 서치바 퍼블리싱을 적용하였다. 
+- graphDB에서 subscribe를 통해 쿼리 결과를 처리했었는데, 별다른 장점이 없이 코드가 길어지기만 한다는 것을 깨닫고 단순히 session.run만 하기로 결정하였다. 매 결과마다 어떠한 처리를 해줘야 하는 경우에는 subscribe의 onNext를 통해도 괜찮을 것 같다.
+- api의 인자와 반환값이 확실히 정해져 있지 않아 혼란스럽고 작업도 느려지는 것 같다. 확실히 스펙이 정해지면 좋겠지만 지금은 그렇게 상의할 여유는 없을 것 같다. 회사에서는 아니길..
+- apollo-client가 apollo-boost보다 현재로써는 파일 업로드, 캐싱과 같은 더 많은 기능이 있다는 것을 알았다. 그래서 boost에서 client로 마이그레이션 하는 경우도 많은 것 같다.
+
+## 일과 후 공부
+### 구조 분해 할당
+#### 계기
+```javascript=
+function Button({
+  size,
+  text,
+  full,
+  textColor,
+  backgroundColor,
+  ...rest
+}: IProps) {
+  return (
+    <SButton
+      text={text}
+      size={size}
+      full={full}
+      textColor={textColor}
+      backgroundColor={backgroundColor}
+      {...rest}
+    >
+      {text}
+    </SButton>
+  );
+}
+```
+위와 같은 코드를 보게 되었고, rest는 분명 객체일 텐데 어떻게 {...rest}를 하면 위처럼 text={text} size={size}이렇게 되는 걸까? 하고 의문이 가서 객체구조할당에 대해 다시 한번 공부해보게 되었다.
+결론적으로는 리엑트에서 저렇게 받을 뿐이고, 자바스크립트의 원래 특성으로는 rest와 {...rest} 모두 얕은 복사라는 것을 다시 한번 떠올렸다.
+
+#### 인자 구조 분해
+```javascript=
+    function abc({a, b, ...rest}) {
+        console.log(rest)
+    }
+    
+    abc({a: 1, b:2, c:3});
+```
+여기서 rest는 {c: 3}이 된다.
+
+```javascript=
+    function cde([a, b, ...rest]) {
+        console.log(rest)
+    }
+    
+    cde([1,2,3]);
+```
+위에 논리에 따르면 rest는 [3]이 된다.
+
+#### 인자 구조 분해 + 타입스크립트
+```javascript=
+const sizeStyles = css`
+  ${({ size }: IProps) =>
+    css`
+      height: ${sizes[size].height};
+      font-size: ${sizes[size].fontSize};
+      width: ${sizes[size].width};
+    `}
+`;
+```
+여기서 IProps는 들어오는 인자를 검사하지 {size}를 검사하는 것이 아니다.
+
+#### 깊은 값 구조 분해
+```javascript=
+const deepObject = {
+  state : {
+    information : {
+      name : 'devlog',
+      category : ['js', 'algorithm', 'java']
+    }
+  },
+  age : 1
+};
+
+const {
+  state : {
+    information : { name: test, category: [a,b] }
+  },
+  age
+} = deepObject;
+```
+깊은 값 구조 분해 할당에서는 실제로 어떤 변수가 선언되는 것인지 아는 것이 필요하다. 이 예시에서 실제로 선언되는 변수는 
+test, a, b, age 뿐이다.
+2. {information} = state 
+3. {name, category} = information 
+4. {test} = name, [a,b] = category
+
+방식으로 구조 분해 할당이 될 텐데 중간 과정의 변수들은 선언이 안되는 것이 좀 신기하다. 어떤 방식으로 내부에서 작동하는 것일까?
+
+#### 에러
+obj가 객체일 경우
+const a = {...obj}는 가능하지만
+...obj만 하면 에러가 발생한다. 
+
+
