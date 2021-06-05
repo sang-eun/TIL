@@ -1,0 +1,70 @@
+문제: https://leetcode.com/problems/merge-sorted-array/
+
+```
+class Solution {
+    fun merge(nums1: IntArray, m: Int, nums2: IntArray, n: Int): Unit {
+        val l1 = m
+        val l2 = n
+        var s1 = 0
+        var s2 = 0
+        val arr = nums1.copyOf()
+        var idx = 0
+
+        while(s1 != l1 && s2 != l2) {
+            val num1 = arr[s1]
+            val num2 = nums2[s2]
+
+            if(num1 < num2) {
+                nums1[idx++] = num1
+                s1++
+            } else {
+                nums1[idx++] = num2
+                s2++
+            }
+        }
+
+        if(s1 != l1) {
+            for(i in s1 until l1) {
+                nums1[idx++] = arr[i]
+            }
+        }
+
+        if(s2 != l2) {
+            for(i in s2 until l2) {
+                nums1[idx++] = nums2[i]
+            }
+        }
+    }
+}
+```
+처음 답안은 이처럼 새로운 num1 배열을 카피해서, 그 카피본과 num2를 비교하면서 num1에다가 입력하였다.
+
+
+```
+class Solution {
+    fun merge(nums1: IntArray, m: Int, nums2: IntArray, n: Int): Unit {
+        var lastIdx1 = m-1
+        var lastIdx2 = n-1
+        var lastidx = m + n -1
+
+        while(lastIdx1 >=0 && lastIdx2 >= 0) {
+            if(nums1[lastIdx1] < nums2[lastIdx2]) {
+               nums1[lastidx--] = nums2[lastIdx2--]
+            } else {
+                nums1[lastidx--] = nums1[lastIdx1--]
+            }
+        }
+
+        while(lastIdx1 >=0) {
+            nums1[lastidx--] = nums1[lastIdx1--]
+        }
+
+        while(lastIdx2 >=0) {
+            nums1[lastidx--] = nums2[lastIdx2--]
+        }
+    }
+}
+```
+하지만 다른 코드를 참조하니 순차적으로 데이터를 넣는 것이 아니라, 끝에서부터 데이터를 넣어도 현재 num1이 처리해야할 데이터에는 손상이 가지 않으므로 문제가 되지 않는다는 것을 깨닫고 코드를 수정하였다. 
+fastest 100퍼! 
+
